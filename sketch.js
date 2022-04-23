@@ -4,8 +4,8 @@ function gridData() {
 	let data = new Array();
 	let xpos = 1; //starting xpos and ypos at 1 so the stroke will show when we make the grid below
 	let ypos = 1;
-	let width = 20;
-	let height = 20;
+	let width = 15;
+	let height = 15;
 	let gridInput = document.getElementById("gridSize").value;
 	if (!gridInput) {
 		gridSize = 20;
@@ -53,6 +53,7 @@ var gameMatrix = new Array();
 gameMatrix.push(new Array(2));
 gameMatrix.push(new Array(2));
 var playAnime = false;
+var allDefector = false;
 
 var resetButton = d3.select("#resetbutton")
 	.on('click', function () {
@@ -121,7 +122,7 @@ function animeLoop() {
 			}
 			for (let row = 0; row < gridSize; row++) {
 				for (let col = 0; col < gridSize; col++) {
-					let arr = new Array(8).fill(null);
+					let arr = new Array(8).fill(-1);
 					if (row > 0 && col > 0) { arr[0] = payOffData[row - 1][col - 1]; }
 					if (row > 0 && col < (gridSize - 1)) { arr[1] = payOffData[row - 1][col + 1]; }
 					if (row < (gridSize - 1) && col > 0) { arr[2] = payOffData[row + 1][col - 1]; }
@@ -169,7 +170,7 @@ function animeLoop() {
 						mygrid[row][col].click = 1;
 					}
 					else if (newData[row][col] == 1) {
-						column._groups[row][col].style.fill = "#cccfff";
+						column._groups[row][col].style.fill = "#232652";
 					}
 					else if (newData[row][col] == 0 && mygrid[row][col].click != newData[row][col]) {
 						column._groups[row][col].style.fill = "#fca973";
@@ -177,12 +178,29 @@ function animeLoop() {
 						mygrid[row][col].click = 0;
 					}
 					else {
-						column._groups[row][col].style.fill = "#fbe1cd"
+						column._groups[row][col].style.fill = "#4c2c13";
 					}
 				}
 			}
 			if (iter < 10) {
 				animeLoop();
+			} else {
+				setTimeout(function () { }, 1600);
+				if (allDefector) {
+					for (let row = 0; row < gridSize; row++) {
+						for (let col = 0; col < gridSize; col++) {
+							mygrid[row][col].click = 1;
+							column._groups[row][col].style.fill = "#8080ff";
+						}
+					}
+				} else {
+					for (let row = 0; row < gridSize; row++) {
+						for (let col = 0; col < gridSize; col++) {
+							mygrid[row][col].click = 0;
+							column._groups[row][col].style.fill = "#fca973";
+						}
+					}
+				}
 			}
 		}, 800
 	);
@@ -202,7 +220,7 @@ var playButton = d3.select("#play-pause")
 	});
 
 var gridButton = d3.select("#resetgrid")
-	.on('click', function(){
+	.on('click', function () {
 		grid = null;
 		document.getElementById("d3sketch").innerHTMl = "";
 		gridSize = parseFloat(document.getElementById("gridSize").value);
@@ -229,8 +247,26 @@ var gridButton = d3.select("#resetgrid")
 			.style("stroke", "#222")
 			.on('click', function (d) {
 				d.click++;
+				d.click = (d.click) % 2;
+				console.log(d.click);
 				if ((d.click) % 2 == 0) { d3.select(this).style("fill", "#fca973"); } // color for C
 				if ((d.click) % 2 == 1) { d3.select(this).style("fill", "#8080ff"); } // color for D
-				d.click = (d.click) % 2;
+
 			});
+	});
+
+var setCellType = d3.select("#setAllDefectorButton")
+	.on('click', function () {
+		allDefector = !allDefector;
+		for (let i = 0; i < gridSize; i++) {
+			for (let j = 0; j < gridSize; j++) {
+				mygrid[i][j].click++;
+				mygrid[i][j].click = mygrid[i][j].click % 2;
+				if (mygrid[i][j].click == 0) {
+					column._groups[i][j].style.fill = "#8080ff";
+				} else {
+					column._groups[i][j].style.fill = "#fca973";
+				}
+			}
+		}
 	});
